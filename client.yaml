@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: python-client
+spec:
+  restartPolicy: OnFailure
+  containers:
+  - image: python:3.7.12
+    name: python
+    command: ["sleep"]
+    args: ["100000"]

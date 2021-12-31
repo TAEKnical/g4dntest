@@ -1,0 +1,356 @@
+# https://github.com/awslabs/aws-virtual-gpu-device-plugin
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: resnet-deployment
+spec:
+  replicas: 11
+  selector:
+    matchLabels:
+      app: resnet-server
+  template:
+    metadata:
+      labels:
+        app: resnet-server
+    spec:
+      # hostIPC is required for MPS communication
+      hostIPC: true
+      nodeSelector:
+        k8s.amazonaws.com/accelerator: vgpu
+      containers:
+      - name: resnet-container
+        # image: seedjeffwan/tensorflow-serving-gpu:resnet
+        # docker tag seedjeffwan/tensorflow-serving-gpu:resnet seedjeffwan/tensorflow-serving-gpu:resnet
+        image: seedjeffwan/tensorflow-serving-gpu:resnet
+        args:
+        # Make sure you set limit based on the vGPU account to avoid tf-serving process occupy all the gpu memory
+        - --per_process_gpu_memory_fraction=0.2
+        env:
+        - name: MODEL_NAME
+          value: resnet
+        ports:
+        - containerPort: 8501
+        # Use virtual gpu resource here
+        # resources:
+        #   limits:
+        #     k8s.amazonaws.com/vgpu: 3
+        volumeMounts:
+        - name: nvidia-mps
+          mountPath: /tmp/nvidia-mps
+      volumes:
+      - name: nvidia-mps
+        hostPath:
+          path: /tmp/nvidia-mps
+# ---
+# apiVersion: apps/v1
+# kind: Deployment
+# metadata:
+#   name: resnet-server1
+# spec:
+#   replicas: 0
+#   selector:
+#     matchLabels:
+#       app: resnet-server1
+#   template:
+#     metadata:
+#       labels:
+#         app: resnet-server1
+#     spec:
+#       # hostIPC is required for MPS communication
+#       hostIPC: true
+#       nodeSelector:
+#         kubernetes.io/hostname: ip-10-142-8-237.ap-northeast-2.compute.internal
+#       containers:
+#       - name: resnet-container
+#         image: seedjeffwan/tensorflow-serving-gpu:resnet
+#         args:
+#         # Make sure you set limit based on the vGPU account to avoid tf-serving process occupy all the gpu memory
+#         - --per_process_gpu_memory_fraction=0.2
+#         env:
+#         - name: MODEL_NAME
+#           value: resnet
+#         ports:
+#         - containerPort: 8501
+#         # Use virtual gpu resource here
+#         resources:
+#           limits:
+#             k8s.amazonaws.com/vgpu: 0
+#         volumeMounts:
+#         - name: nvidia-mps
+#           mountPath: /tmp/nvidia-mps
+#       volumes:
+#       - name: nvidia-mps
+#         hostPath:
+#           path: /tmp/nvidia-mps
+# ---
+# apiVersion: apps/v1
+# kind: Deployment
+# metadata:
+#   name: resnet-server2
+# spec:
+#   replicas: 0
+#   selector:
+#     matchLabels:
+#       app: resnet-server2
+#   template:
+#     metadata:
+#       labels:
+#         app: resnet-server2
+#     spec:
+#       # hostIPC is required for MPS communication
+#       hostIPC: true
+#       nodeSelector:
+#         kubernetes.io/hostname: ip-10-142-8-237.ap-northeast-2.compute.internal
+#       containers:
+#       - name: resnet-container
+#         image: seedjeffwan/tensorflow-serving-gpu:resnet
+#         args:
+#         # Make sure you set limit based on the vGPU account to avoid tf-serving process occupy all the gpu memory
+#         - --per_process_gpu_memory_fraction=0.2
+#         env:
+#         - name: MODEL_NAME
+#           value: resnet
+#         ports:
+#         - containerPort: 8501
+#         # Use virtual gpu resource here
+#         resources:
+#           limits:
+#             k8s.amazonaws.com/vgpu: 1
+#         volumeMounts:
+#         - name: nvidia-mps
+#           mountPath: /tmp/nvidia-mps
+#       volumes:
+#       - name: nvidia-mps
+#         hostPath:
+#           path: /tmp/nvidia-mps
+# ---
+# apiVersion: apps/v1
+# kind: Deployment
+# metadata:
+#   name: resnet-server3
+# spec:
+#   replicas: 0
+#   selector:
+#     matchLabels:
+#       app: resnet-server3
+#   template:
+#     metadata:
+#       labels:
+#         app: resnet-server3
+#     spec:
+#       # hostIPC is required for MPS communication
+#       hostIPC: true
+#       nodeSelector:
+#         kubernetes.io/hostname: ip-10-142-8-237.ap-northeast-2.compute.internal
+#       containers:
+#       - name: resnet-container
+#         image: seedjeffwan/tensorflow-serving-gpu:resnet
+#         args:
+#         # Make sure you set limit based on the vGPU account to avoid tf-serving process occupy all the gpu memory
+#         - --per_process_gpu_memory_fraction=0.2
+#         env:
+#         - name: MODEL_NAME
+#           value: resnet
+#         ports:
+#         - containerPort: 8501
+#         # Use virtual gpu resource here
+#         resources:
+#           limits:
+#             k8s.amazonaws.com/vgpu: 2
+#         volumeMounts:
+#         - name: nvidia-mps
+#           mountPath: /tmp/nvidia-mps
+#       volumes:
+#       - name: nvidia-mps
+#         hostPath:
+#           path: /tmp/nvidia-mps
+# ---
+# apiVersion: apps/v1
+# kind: Deployment
+# metadata:
+#   name: resnet-server4
+# spec:
+#   replicas: 10
+#   selector:
+#     matchLabels:
+#       app: resnet-server4
+#   template:
+#     metadata:
+#       labels:
+#         app: resnet-server4
+#     spec:
+#       # hostIPC is required for MPS communication
+#       hostIPC: true
+#       nodeSelector:
+#         kubernetes.io/hostname: ip-10-142-8-237.ap-northeast-2.compute.internal
+#       containers:
+#       - name: resnet-container
+#         image: seedjeffwan/tensorflow-serving-gpu:resnet
+#         args:
+#         # Make sure you set limit based on the vGPU account to avoid tf-serving process occupy all the gpu memory
+#         - --per_process_gpu_memory_fraction=0.2
+#         env:
+#         - name: MODEL_NAME
+#           value: resnet
+#         ports:
+#         - containerPort: 8501
+#         ## Use virtual gpu resource here
+#         resources:
+#           limits:
+#             k8s.amazonaws.com/vgpu: 16
+#         volumeMounts:
+#         - name: nvidia-mps
+#           mountPath: /tmp/nvidia-mps
+#       volumes:
+#       - name: nvidia-mps
+#         hostPath:
+#           path: /tmp/nvidia-mps
+# ---
+# apiVersion: apps/v1
+# kind: Deployment
+# metadata:
+#   name: python-client1
+#   labels:
+#     app: python-client1
+# spec:
+#   replicas: 4
+#   selector:
+#     matchLabels:
+#       app: python-client1
+#   template:
+#     metadata:
+#       labels:
+#         app: python-client1
+#     spec:
+#       containers:
+#       - name: python-client1
+#         image: python:3.7.12
+#         name: python
+#         command: ["sleep"]
+#         args: ["100000"]
+#         ports:
+#         - containerPort: 8501
+# ---
+# apiVersion: apps/v1
+# kind: Deployment
+# metadata:
+#   name: python-client2
+#   labels:
+#     app: python-client2
+# spec:
+#   replicas: 4
+#   selector:
+#     matchLabels:
+#       app: python-client2
+#   template:
+#     metadata:
+#       labels:
+#         app: python-client2
+#     spec:
+#       containers:
+#       - name: python-client2
+#         image: python:3.7.12
+#         name: python
+#         command: ["sleep"]
+#         args: ["100000"]
+#         ports:
+#         - containerPort: 8501
+# ---
+# apiVersion: apps/v1
+# kind: Deployment
+# metadata:
+#   name: python-client3
+#   labels:
+#     app: python-client3
+# spec:
+#   replicas: 4
+#   selector:
+#     matchLabels:
+#       app: python-client3
+#   template:
+#     metadata:
+#       labels:
+#         app: python-client3
+#     spec:
+#       containers:
+#       - name: python-client3
+#         image: python:3.7.12
+#         name: python
+#         command: ["sleep"]
+#         args: ["100000"]
+#         ports:
+#         - containerPort: 8501
+# ---
+# apiVersion: apps/v1
+# kind: Deployment
+# metadata:
+#   name: python-client4
+#   labels:
+#     app: python-client4
+# spec:
+#   replicas: 4
+#   selector:
+#     matchLabels:
+#       app: python-client4
+#   template:
+#     metadata:
+#       labels:
+#         app: python-client4
+#     spec:
+#       containers:
+#       - name: python-client4
+#         image: python:3.7.12
+#         name: python
+#         command: ["sleep"]
+#         args: ["100000"]
+#         ports:
+#         - containerPort: 8501
+# ---
+# apiVersion: v1
+# kind: Service
+# metadata:
+#   name: resnet-server1
+# spec:
+#   selector:
+#     app: resnet-server1
+#   ports:
+#     - protocol: TCP
+#       port: 8501
+#       targetPort: 8501
+# ---
+# apiVersion: v1
+# kind: Service
+# metadata:
+#   name: resnet-server2
+# spec:
+#   selector:
+#     app: resnet-server2
+#   ports:
+#     - protocol: TCP
+#       port: 8501
+#       targetPort: 8501
+# ---
+# apiVersion: v1
+# kind: Service
+# metadata:
+#   name: resnet-server3
+# spec:
+#   selector:
+#     app: resnet-server3
+#   ports:
+#     - protocol: TCP
+#       port: 8501
+#       targetPort: 8501
+# ---
+# apiVersion: v1
+# kind: Service
+# metadata:
+#   name: resnet-server4
+# spec:
+#   selector:
+#     app: resnet-server4
+#   ports:
+#     - protocol: TCP
+#       port: 8501
+#       targetPort: 8501
+...
